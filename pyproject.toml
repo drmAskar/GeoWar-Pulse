@@ -1,0 +1,21 @@
+[project]
+name = "geowar-pulse-backend"
+version = "0.1.0"
+description = "GeoWar Pulse backend MVP"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi==0.115.0",
+  "uvicorn[standard]==0.30.6",
+  "pydantic==2.9.2",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.uvicorn]
+factory = false
+app = "app.main:app"
+host = "0.0.0.0"
+port = 8000
+reload = true

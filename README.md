@@ -28,5 +28,25 @@ GeoWar Pulse provides a **probabilistic risk score** (not certainty) for escalat
 - **Frontend**: React + map visualization
 - **Storage**: Postgres (events/features/scores)
 
+## Frontend MVP (React + Vite)
+A map-first UI skeleton is available in `frontend/` with:
+- World map placeholder + risk legend
+- Top hotspots list
+- Right-side country detail panel wired to sample API JSON
+- Mobile responsive layout basics
+
+Run locally:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Build:
+```bash
+npm run build
+npm run preview
+```
+
 ## Status
 Project initialized. Next step: deep research + scoring framework + data-source catalog.

@@ -94,7 +94,8 @@ Returns one row per country for map rendering.
     "momentum": "escalating",
     "confidence": 81,
     "delta24h": 9,
-    "delta7d": 14
+    "delta7d": 14,
+    "topDrivers": ["cross_border_strikes", "troop_mobilization"]
   },
   "drivers": [
     {

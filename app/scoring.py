@@ -97,12 +97,19 @@ def score_country(country_code: str, events: list[SignalEvent], delta_24h: float
     )
     top_drivers = [name for name, value in ranked if value > 0][:3]
 
-    return CountryScore(
+    # Compute risk band from score
+    from .models import risk_band_from_score
+    risk_band = risk_band_from_score(risk_score)
+    
+    score_obj = CountryScore(
         country_code=country_code.upper(),
-        score=round(max(min(risk_score, 100.0), 0.0), 2),
+        risk_score=round(max(min(risk_score, 100.0), 0.0), 2),
+        risk_band=risk_band,
+        momentum=trend_from_deltas(delta_24h=delta_24h, delta_7d=delta_7d),
         confidence=confidence_score(events),
-        trend=trend_from_deltas(delta_24h=delta_24h, delta_7d=delta_7d),
+        delta=delta_24h,
         delta_24h=delta_24h,
         delta_7d=delta_7d,
         top_drivers=top_drivers,
     )
+    return score_obj

@@ -2,99 +2,105 @@
 
 ## Test Summary
 **Date:** 2026-03-04  
-**Time:** ~17:50 UTC  
+**Time:** 20:25 UTC  
 **Repo:** `/root/.openclaw/workspace/GeoWar-Pulse`
 
-## 1. Backend Testing
+## 1. Backend Sanity Testing
 
 ### ✅ `/scores` Endpoint - PASS
 **Test:** `curl -s http://127.0.0.1:9123/scores`  
 **Result:** HTTP 200 with valid JSON response  
-**Output:** `{"window": "24h", "count": 5, "items": [...]}`  
-**Status:** Working correctly
+**Output:**
+```json
+{
+  "window": "24h",
+  "count": 5,
+  "items": [
+    {"country_code": "IRN", "country_name": "Iran", "risk_score": 39.87, "risk_band": "elevated", ...},
+    {"country_code": "ISR", "country_name": "Israel", "risk_score": 51.38, "risk_band": "high", ...},
+    {"country_code": "TWN", "country_name": "Taiwan", "risk_score": 39.7, "risk_band": "elevated", ...},
+    {"country_code": "UKR", "country_name": "Ukraine", "risk_score": 58.69, "risk_band": "high", ...},
+    {"country_code": "VEN", "country_name": "Venezuela", "risk_score": 32.55, "risk_band": "elevated", ...}
+  ]
+}
+```
+**Status:** ✅ PASS
 
 ### ✅ `/scores/{countryCode}` Endpoint - PASS
 **Test:** `curl -s http://127.0.0.1:9123/scores/UKR`  
 **Result:** HTTP 200 with valid country score data  
-**Output:** `{"country_code": "UKR", "risk_score": 58.69, "risk_band": "high", ...}`  
-**Status:** Working correctly
+**Output:**
+```json
+{
+  "country_code": "UKR",
+  "country_name": "Ukraine",
+  "risk_score": 58.66,
+  "risk_band": "high",
+  "momentum": "escalating",
+  "confidence": 76.37,
+  "delta": 9.0,
+  "delta_24h": 9.0,
+  "delta_7d": 14.0,
+  "updated_at": "2026-03-04T20:25:41.799617Z",
+  "top_drivers": ["information credibility", "military signals", "conflict events"]
+}
+```
+**Status:** ✅ PASS
 
-### ✅ `/health` Endpoint - PASS
-**Test:** `curl -s http://127.0.0.1:9123/health`  
-**Result:** HTTP 200 with health status  
-**Status:** Working correctly
+### ✅ Invalid Country Code Handling - PASS
+**Test:** `curl -s http://127.0.0.1:9123/scores/ZZZ`  
+**Result:** HTTP 404 with proper error message  
+**Output:** `{"detail":"No score data for country ZZZ"}`  
+**Status:** ✅ PASS (proper error handling)
 
-### 🔧 Fixes Applied:
-1. **`scoring.py`** - Added missing `risk_band` field to `CountryScore` initialization
-2. **`api.py`** - Updated `_build_country_score` function to use `raw_score` object attributes instead of trying to access `.score` property
-3. **`scoring.py`** - Added import for `risk_band_from_score` and properly computed risk band from score
-
-## 2. Frontend Testing
+## 2. Frontend Build Sanity Testing
 
 ### ✅ Build Process - PASS
-**Command:** `npm run build`  
-**Result:** Build completed successfully in 7.86 seconds  
-**Output:** Created production build in `dist/` directory  
-- `index.html`: 0.40 kB
-- CSS bundle: 23.90 kB
-- JS bundle: 312.33 kB
-**Status:** Frontend build passes sanity check
+**Command:** `cd frontend && npm run build`  
+**Result:** Build completed successfully in 6.47 seconds  
+**Output:**
+```
+✓ 81 modules transformed
+dist/index.html                  0.40 kB │ gzip: 0.27 kB
+dist/assets/index-DjfffW0B.css  23.90 kB │ gzip: 8.53 kB
+dist/assets/index-U6n4kHBD.js  312.33 kB │ gzip: 95.47 kB
+✓ built in 6.47s
+```
+**Status:** ✅ PASS
 
-## 3. Commands Executed
+## 3. Test Commands Executed
 
 ### Backend Test Commands:
 ```bash
 # Start test server
-.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 9123 --log-level error
+.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 9123 --log-level error &
 
 # Test endpoints
 curl -s http://127.0.0.1:9123/scores
 curl -s http://127.0.0.1:9123/scores/UKR
-curl -s http://127.0.0.1:9123/health
+curl -s http://127.0.0.1:9123/scores/ZZZ  # Invalid country test
 ```
 
 ### Frontend Test Commands:
 ```bash
 cd frontend
-npm install  # Already up-to-date
 npm run build
 ```
 
-## 4. Subagent Verification Test (2026-03-04 18:33 UTC)
-
-### ✅ Backend Verification - PASS
-**Test 1:** `/scores` endpoint  
-**Command:** `curl -s http://127.0.0.1:9123/scores`  
-**Result:** HTTP 200 with 5 country scores  
-**Status:** Working correctly
-
-**Test 2:** `/scores/{countryCode}` endpoint  
-**Command:** `curl -s http://127.0.0.1:9123/scores/UKR`  
-**Result:** HTTP 200 with Ukraine score data  
-**Output:** `{"country_code":"UKR","risk_score":58.42,"risk_band":"high",...}`  
-**Status:** Working correctly
-
-### ✅ Frontend Verification - PASS
-**Command:** `npm run build`  
-**Result:** Build completed successfully in 11.49 seconds  
-**Output:** Production build in `dist/` directory  
-**Status:** Frontend build passes sanity check
-
-**Notes:** No fixes needed - all endpoints functional and build process working.
+## 4. Fixes Applied
+**None required** - All tests passed on first run.
 
 ## 5. Overall Assessment
 
 **✅ OVERALL PASS**
 
-Both backend endpoints (`/scores` and `/scores/{countryCode}`) are functional and return valid JSON responses. The frontend builds successfully without errors. No critical issues were found.
+- Backend `/scores` endpoint: ✅ PASS
+- Backend `/scores/{countryCode}` endpoint: ✅ PASS  
+- Backend error handling: ✅ PASS
+- Frontend build: ✅ PASS
 
-## 5. Notes
-- Backend requires Python virtual environment activation (`source .venv/bin/activate`)
-- All dependencies (fastapi, uvicorn, pydantic) are available in the virtual environment
-- The application uses sample data for demonstration purposes
-- Production build output is clean and within reasonable size limits
+All endpoints return valid JSON responses with correct structure. Frontend builds successfully without errors or warnings.
 
 ---
-
-**Tested by:** Subagent  
-**Status:** ✅ PASS
+**Tested by:** GLM5 Subagent (Testing Phase)  
+**Status:** ✅ ALL TESTS PASS
